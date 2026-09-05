@@ -104,14 +104,30 @@ different value; `npm run ai:verify` reports the numbers to calibrate against.
   Moving vectors to `pgvector` removes the need for the caps; see
   [docs/architecture/ai-provider-migration-plan.md](./docs/architecture/ai-provider-migration-plan.md).
 - **No automated test suite yet.** `ai:verify` and `smoke:rag` are live smoke
-  tests, not unit tests. Vitest, React Testing Library and Playwright are
-  planned.
-- **No CI pipeline yet.**
+  tests requiring real credentials and a database, not unit tests. Vitest,
+  React Testing Library and Playwright are planned.
+- **No CI pipeline yet.** The `pre-push` hook is the only automated gate, and
+  it runs locally and can be skipped with `--no-verify`.
+- **No git remote configured.** This repository is local only.
 - `src/tools/`, `src/features/chat/mock-data.ts` and
   `src/components/chat-shell.tsx` are unreferenced legacy files.
 
+## Contributing
+
+Branches follow `main` / `develop` / `feature|bugfix|hotfix|release/*`, and
+commits follow [Conventional Commits](https://www.conventionalcommits.org/),
+enforced by Husky and commitlint. Hooks install on `npm install`.
+
+```bash
+git checkout -b feature/my-change develop
+```
+
+See [docs/branching-and-releases.md](./docs/branching-and-releases.md).
+
 ## Documentation
 
+- [Changelog](./CHANGELOG.md)
+- [Branching and releases](./docs/branching-and-releases.md)
 - [Architecture: current state](./docs/architecture/current-state.md)
 - [AI provider migration plan](./docs/architecture/ai-provider-migration-plan.md)
 - [AI provider configuration](./docs/ai-providers.md)
