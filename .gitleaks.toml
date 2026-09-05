@@ -1,0 +1,9 @@
+# Gitleaks configuration for Northstar AI
+# Allows CI placeholder values in GitHub Actions workflow files.
+# These are not real secrets — they are build-time stubs with no credentials.
+
+[allowlist]
+  description = "CI placeholder values in workflow files"
+  paths = [
+    '''.github/workflows/.*\.yml'''
+  ]

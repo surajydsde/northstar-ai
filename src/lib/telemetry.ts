@@ -1,0 +1,3 @@
+import { logger } from "./logger";
+export async function trace<T>(name: string, operation: () => Promise<T>, context?: Record<string, unknown>): Promise<T> { const started = performance.now(); try { const result = await operation(); logger.info("operation.completed", { name, latencyMs: Math.round(performance.now() - started), ...context }); return result; } catch (error) { logger.error("operation.failed", { name, latencyMs: Math.round(performance.now() - started), error: String(error), ...context }); throw error; } }
+export function recordDecision(decision: string, context?: Record<string, unknown>) { logger.info("agent.decision", { decision, ...context }); }
