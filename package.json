@@ -1,6 +1,6 @@
 {
   "name": "chatgpt-clone",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "scripts": {
     "dev": "next dev --webpack -H 0.0.0.0 -p 3000",
@@ -18,7 +18,10 @@
     "ai:verify": "tsx scripts/verify-provider.ts",
     "smoke:rag": "tsx scripts/smoke-rag.ts",
     "ai:reembed": "tsx scripts/reembed.ts",
-    "uploads:migrate": "tsx scripts/migrate-uploads.ts"
+    "uploads:migrate": "tsx scripts/migrate-uploads.ts",
+    "prepare": "husky",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.124.0",
@@ -44,6 +47,8 @@
     "zod": "^4.5.4"
   },
   "devDependencies": {
+    "@commitlint/cli": "^21.2.2",
+    "@commitlint/config-conventional": "^21.2.2",
     "@types/estree": "^1.0.9",
     "@types/node": "^20",
     "@types/react": "^19",
@@ -51,8 +56,20 @@
     "autoprefixer": "^10.5.4",
     "eslint": "^9",
     "eslint-config-next": "16.3.3",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.4.0",
     "postcss": "^8.5.26",
+    "prettier": "^3.9.6",
     "tailwindcss": "^3.4.17",
     "typescript": "^5"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx,mjs,cjs}": [
+      "eslint --fix --max-warnings=0",
+      "prettier --write"
+    ],
+    "*.{json,css,yml,yaml,md}": [
+      "prettier --write"
+    ]
   }
 }
