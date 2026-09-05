@@ -128,7 +128,7 @@ export async function POST(request: Request) {
     const history = await messageService.listByConversation(conversation.id, HISTORY_LIMIT);
     const isFirstTurn = history.length === 0;
 
-    await messageService.create({
+    const userMessage = await messageService.create({
       conversationId: conversation.id,
       userId,
       role: 'user',
@@ -198,6 +198,11 @@ export async function POST(request: Request) {
             await persistTurn({ conversationId: conversation.id, userId, message, reply, isFirstTurn }).catch(
               () => undefined,
             );
+          } else if (userMessage) {
+            // Nothing was generated, so roll back the user turn. Leaving it
+            // stranded would show a prompt with no answer, and a retry would
+            // then read as a duplicated message.
+            await messageService.delete(userMessage.id).catch(() => undefined);
           }
 
           // The status line is already sent, so the failure has to travel

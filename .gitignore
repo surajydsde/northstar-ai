@@ -43,3 +43,6 @@ next-env.d.ts
 # uploaded files
 /storage/uploads/
 /public/uploads/
+
+# local editor/launch config
+.claude/
