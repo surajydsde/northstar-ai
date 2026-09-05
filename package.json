@@ -64,11 +64,11 @@
     "typescript": "^5"
   },
   "lint-staged": {
-    "*.{ts,tsx}": [
+    "*.{ts,tsx,js,jsx,mjs,cjs}": [
       "eslint --fix --max-warnings=0",
       "prettier --write"
     ],
-    "*.{json,css,yml,yaml}": [
+    "*.{json,css,yml,yaml,md}": [
       "prettier --write"
     ]
   }
