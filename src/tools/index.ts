@@ -1,0 +1,13 @@
+import { z } from "zod";
+import { tool } from "@langchain/core/tools";
+import { searchMemories } from "@/features/memory";
+import { searchDocuments } from "@/features/rag";
+export const currentTimeTool = tool(() => new Date().toISOString(), { name: "current_time", description: "Get the current ISO timestamp.", schema: z.object({}) });
+export const calculatorTool = tool(({ expression }) => { if (!/^[0-9+\-*/().%\s]+$/.test(expression)) throw new Error("Only arithmetic expressions are allowed"); return String(Function(`"use strict"; return (${expression})`)()); }, { name: "calculator", description: "Evaluate a basic arithmetic expression.", schema: z.object({ expression: z.string() }) });
+export const webSearchMockTool = tool(async ({ query }) => `Mock web results for: ${query}. Connect a search provider before using this in production.`, { name: "web_search", description: "Search the web (local mock).", schema: z.object({ query: z.string() }) });
+export const weatherMockTool = tool(async ({ location }) => `Mock weather for ${location}: 22°C, partly cloudy.`, { name: "weather", description: "Get weather (local mock).", schema: z.object({ location: z.string() }) });
+export const documentSearchTool = tool(async ({ userId, query }) => JSON.stringify(await searchDocuments(userId, query)), { name: "document_search", description: "Search uploaded documents.", schema: z.object({ userId: z.string(), query: z.string() }) });
+export const memorySearchTool = tool(async ({ userId, query }) => JSON.stringify(searchMemories(userId, query)), { name: "memory_search", description: "Search user memories.", schema: z.object({ userId: z.string(), query: z.string() }) });
+export const toolRegistry = { current_time: currentTimeTool, calculator: calculatorTool, web_search: webSearchMockTool, weather: weatherMockTool, document_search: documentSearchTool, memory_search: memorySearchTool };
+export type ToolName = keyof typeof toolRegistry;
+export const tools = Object.values(toolRegistry);

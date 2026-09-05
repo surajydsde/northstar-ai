@@ -1,0 +1,54 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: chatgpt-clone-app
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: development
+      PORT: 3000
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/chatgpt
+      BETTER_AUTH_URL: http://localhost:3000
+      NEXT_PUBLIC_APP_URL: http://localhost:3000
+      UPLOADS_DIR: storage/uploads
+    ports:
+      - "3000:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - .:/app
+      - /app/node_modules
+      # Uploads live outside the image so they survive a rebuild.
+      - uploads_data:/app/storage/uploads
+    command: npm run dev
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: chatgpt-clone-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-chatgpt}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-chatgpt}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+# Inference is now served by an external provider API (see AI_PROVIDER), so the
+# local `ollama` service has been removed. `chroma` has also been removed: it
+# was started and port-mapped but nothing in the application ever connected to
+# it — retrieval runs against Postgres.
+
+volumes:
+  postgres_data:
+  uploads_data:

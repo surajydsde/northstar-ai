@@ -1,0 +1,1 @@
+Product launch summary: we shipped the AI assistant in August. Key metrics: faster onboarding, higher completion, and lower support costs. Next step: expand document indexing and memory retention.
