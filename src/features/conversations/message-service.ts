@@ -34,6 +34,12 @@ export class MessageService {
       .limit(limit);
   }
 
+  /** Removes a single message. Used to roll back an orphaned turn. */
+  async delete(id: string) {
+    const result = await db.delete(messages).where(eq(messages.id, id));
+    return Number((result as { rowCount?: number | null }).rowCount ?? 0) > 0;
+  }
+
   async create(input: {
     conversationId: string;
     userId: string;

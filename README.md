@@ -66,6 +66,9 @@ Open http://localhost:3000.
 | `npm run ai:verify` | Live check of chat, streaming and embeddings |
 | `npm run ai:reembed` | Rewrite stored vectors under the current model |
 | `npm run smoke:rag` | End-to-end RAG + memory + persistence test |
+| `npm test` | Unit tests (Vitest) |
+| `npm run test:coverage` | Unit tests with coverage thresholds |
+| `npm run format` | Prettier |
 
 ## Configuration
 
@@ -101,14 +104,14 @@ different value; `npm run ai:verify` reports the numbers to calibrate against.
 - **Retrieval scans in Node.** Embeddings live in `json` columns that no index
   can serve, so queries are bounded by `RAG_MAX_DOCUMENTS` (25) and
   `MEMORY_MAX_SCANNED` (1000). Content beyond those bounds is not searchable.
-  Moving vectors to `pgvector` removes the need for the caps; see
-  [docs/architecture/ai-provider-migration-plan.md](./docs/architecture/ai-provider-migration-plan.md).
-- **No automated test suite yet.** `ai:verify` and `smoke:rag` are live smoke
-  tests requiring real credentials and a database, not unit tests. Vitest,
-  React Testing Library and Playwright are planned.
-- **No CI pipeline yet.** The `pre-push` hook is the only automated gate, and
-  it runs locally and can be skipped with `--no-verify`.
-- **No git remote configured.** This repository is local only.
+  Moving vectors to `pgvector` removes the need for the caps, but your
+  PostgreSQL install does not provide the extension — see
+  [docs/pgvector-migration.md](./docs/pgvector-migration.md).
+- **No end-to-end browser tests.** 147 unit tests cover the AI layer and
+  embedding logic (94% statements, 89% branches). Route handlers and React
+  components are not yet covered; Playwright is not set up.
+- **No git remote configured**, so CI has not run yet. The workflow in
+  `.github/workflows/ci.yml` is written but unexercised.
 - `src/tools/`, `src/features/chat/mock-data.ts` and
   `src/components/chat-shell.tsx` are unreferenced legacy files.
 
@@ -127,6 +130,7 @@ See [docs/branching-and-releases.md](./docs/branching-and-releases.md).
 ## Documentation
 
 - [Changelog](./CHANGELOG.md)
+- [pgvector migration](./docs/pgvector-migration.md)
 - [Branching and releases](./docs/branching-and-releases.md)
 - [Architecture: current state](./docs/architecture/current-state.md)
 - [AI provider migration plan](./docs/architecture/ai-provider-migration-plan.md)
