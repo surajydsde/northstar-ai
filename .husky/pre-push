@@ -1,0 +1,4 @@
+# Full gate before code leaves the machine. Slower than pre-commit by design.
+npm run typecheck
+npm run lint
+npm run build
