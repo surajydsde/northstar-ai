@@ -1,0 +1,15 @@
+# Normalise to LF in the repository; Git converts on checkout per platform.
+* text=auto eol=lf
+
+# Binary assets must never be converted.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.pdf binary
+*.woff binary
+*.woff2 binary
+
+# Generated — collapse in diffs and reviews.
+package-lock.json linguist-generated=true -diff
