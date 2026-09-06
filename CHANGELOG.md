@@ -4,6 +4,50 @@ All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/); versions follow
 [Semantic Versioning](https://semver.org/).
 
+## [0.3.0] - 2026-09-06
+
+Vector retrieval moved into Postgres via pgvector on Neon.
+
+### Added
+
+- `vector(768)` columns (`embedding_vec`) on `memories` and `document_chunks`
+  with HNSW indexes for cosine similarity.
+- Migration `src/db/migrations/0002_pgvector.sql` — idempotent; safe to re-run.
+- `scripts/backfill-pgvector.ts` (`npm run db:backfill-vectors`) — backfills the
+  new columns from existing json/jsonb embedding data.
+- `src/db/index.ts` exports `resolveSsl()` — URL-based TLS selection replaces
+  the `NODE_ENV`-based hardcoding that always disabled TLS in development.
+- 154 automated tests (Vitest 5).
+
+### Changed
+
+- `rag-service.ts` and `memory-service.ts` delegate similarity scoring to
+  Postgres (`cosineDistance` via Drizzle) instead of pulling candidate rows into
+  Node and computing cosine in a loop.
+- Memory search uses a hybrid score: `greatest(vector_score, keyword_score)`.
+  Rows with a null `embedding_vec` (no vector, or a vector from a retired model)
+  still match on keyword via `ILIKE`.
+- Database moved to Neon (hosted Postgres, free tier). pgvector 0.8.0 is
+  available on all Neon plans; the local Windows PostgreSQL 17 install does not
+  ship the extension.
+
+### Removed
+
+- `RAG_MAX_DOCUMENTS`, `RAG_MAX_CHUNKS`, `MEMORY_MAX_SCANNED` environment
+  variables. These were workarounds for in-process scanning and are unnecessary
+  with HNSW indexing.
+- Vector-space tagging in application code (`isComparable`, `writeTag`,
+  `readTag`). Cross-model similarity corruption is now prevented structurally:
+  `embedding_vec` only ever holds vectors from `aiClient.embed`; stale vectors
+  from retired models have null columns and are absent from results rather than
+  scored incorrectly.
+
+### Known limitations
+
+- The old `json`/`jsonb` embedding columns are still present. They are not
+  written or read by application code, and will be dropped in a future migration
+  once confirmed safe.
+
 ## [0.2.0] - 2026-09-06
 
 Migration from local Ollama inference to pluggable external AI providers.

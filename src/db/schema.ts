@@ -1,4 +1,4 @@
-import { bigint, bigserial, boolean, json, pgTable, text, timestamp, varchar } from 'drizzle-orm/pg-core';
+import { bigint, bigserial, boolean, json, pgTable, text, timestamp, varchar, vector } from 'drizzle-orm/pg-core';
 
 export const user = pgTable('user', {
   id: text('id').primaryKey(),
@@ -99,7 +99,9 @@ export const memories = pgTable('memories', {
     .notNull()
     .references(() => user.id, { onDelete: 'cascade' }),
   content: text('content').notNull(),
+  /** @deprecated superseded by embeddingVec (pgvector). Kept for one release as a rollback path. */
   embedding: json('embedding').default([]),
+  embeddingVec: vector('embedding_vec', { dimensions: 768 }),
   source: varchar('source', { length: 64 }).notNull().default('chat'),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
@@ -129,7 +131,9 @@ export const documentChunks = pgTable('document_chunks', {
   content: text('content').notNull(),
   chunkIndex: bigint('chunk_index', { mode: 'number' }).notNull().default(0),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  /** @deprecated vector now lives in embeddingVec; metadata.embeddings is kept for one release as a rollback path. */
   metadata: json('metadata').default({}),
+  embeddingVec: vector('embedding_vec', { dimensions: 768 }),
 });
 
 export const agentRuns = pgTable('agent_runs', {

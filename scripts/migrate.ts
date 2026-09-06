@@ -16,13 +16,15 @@ import path from 'node:path';
 
 import postgres from 'postgres';
 
+import { resolveSsl } from '../src/db';
+
 const MIGRATIONS_DIR = path.join(process.cwd(), 'src', 'db', 'migrations');
 
 async function main() {
   const url = process.env.DATABASE_URL;
   if (!url) throw new Error('DATABASE_URL is not set.');
 
-  const sql = postgres(url, { ssl: false, max: 1 });
+  const sql = postgres(url, { ssl: resolveSsl(url), max: 1 });
 
   try {
     await sql`

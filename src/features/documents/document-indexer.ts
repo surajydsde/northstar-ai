@@ -1,6 +1,5 @@
 import { db } from '@/db';
 import { documentChunks } from '@/db/schema';
-import { writeTag } from '@/features/embeddings';
 import { aiClient } from '@/lib/ai';
 import { logger } from '@/lib/logger';
 
@@ -42,7 +41,6 @@ export async function indexDocument(input: {
   const chunks = chunkText(input.content);
   const embeddings: number[][] = [];
   let embeddingsAvailable = true;
-  let tag = aiClient.embeddingTag();
 
   if (chunks.length > 0) {
     try {
@@ -52,12 +50,11 @@ export async function indexDocument(input: {
         // providers that support asymmetric retrieval score better for it.
         const result = await aiClient.embed(batch, { purpose: 'document' });
         embeddings.push(...result.vectors);
-        tag = { provider: result.provider, model: result.model, dimensions: result.dimensions };
       }
     } catch (error) {
       // Preserved from the original design: an embedding outage must not lose
-      // the upload. Chunks are stored untagged and are simply not retrievable
-      // until re-embedded.
+      // the upload. Chunks are stored with a null vector and are simply not
+      // retrievable until re-embedded.
       embeddingsAvailable = false;
       embeddings.length = 0;
       logger.warn('Document embeddings unavailable; storing chunks without vectors', {
@@ -69,17 +66,14 @@ export async function indexDocument(input: {
 
   if (chunks.length > 0) {
     await db.insert(documentChunks).values(
-      chunks.map((content, chunkIndex) => {
-        const vector = embeddings[chunkIndex] ?? null;
-        const base = { fileName: input.fileName, embeddings: vector };
-        return {
-          id: crypto.randomUUID(),
-          documentId: input.documentId,
-          content,
-          chunkIndex,
-          metadata: vector ? writeTag(base, tag) : base,
-        };
-      }),
+      chunks.map((content, chunkIndex) => ({
+        id: crypto.randomUUID(),
+        documentId: input.documentId,
+        content,
+        chunkIndex,
+        metadata: { fileName: input.fileName },
+        embeddingVec: embeddings[chunkIndex],
+      })),
     );
   }
 

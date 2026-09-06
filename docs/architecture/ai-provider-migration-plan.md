@@ -1,6 +1,6 @@
 # Migration Plan — Ollama → Pluggable External AI Providers
 
-**Status:** Proposed. Awaiting approval.
+**Status:** Complete.
 **Companion document:** [current-state.md](./current-state.md)
 
 **Decisions taken (2026-09-05):**

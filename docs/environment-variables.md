@@ -40,9 +40,6 @@ fail to start rather than run on a value published in this repository.
 |---|---|---|
 | `RAG_MIN_SCORE` | `0.62` | Relevance floor for documents. **Model-specific** — see below. |
 | `MEMORY_MIN_SCORE` | `0.62` | Relevance floor for memories. |
-| `RAG_MAX_DOCUMENTS` | `25` | Most recent documents considered per query. |
-| `RAG_MAX_CHUNKS` | `2000` | Hard cap on chunks pulled into memory per query. |
-| `MEMORY_MAX_SCANNED` | `1000` | Most recently updated memories scanned per query. |
 
 The score thresholds are properties of the embedding model, not constants.
 Measured with `gemini-embedding-001` at 768 dimensions, unrelated pairs score
@@ -51,10 +48,9 @@ inherited from the Ollama setup was `0.3`, which under these embeddings matches
 everything and disables filtering entirely. Recalibrate with `npm run ai:verify`
 whenever the embedding model changes.
 
-The `MAX_*` bounds exist because embeddings are stored in `json` columns that no
-index can serve, so retrieval scans candidate rows in the application. Content
-outside these bounds is not searchable. They become unnecessary once vectors
-move into `pgvector`.
+Retrieval is handled inside Postgres via pgvector HNSW indexes. There are no
+application-side scan caps — `ORDER BY ... LIMIT` only materialises the rows
+returned, regardless of table size.
 
 ## Storage
 
