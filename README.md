@@ -1,8 +1,8 @@
-# ChatGPT Clone
+# Northstar AI
 
-A ChatGPT-style chat application built with Next.js, Better Auth, PostgreSQL and
-a pluggable AI provider layer. Retrieval-augmented generation and long-term
-memory are orchestrated with LangGraph and persisted in Postgres.
+A production-grade AI chat platform built with Next.js, Better Auth, PostgreSQL
+and a pluggable AI provider layer. Retrieval-augmented generation and long-term
+memory are orchestrated with LangGraph and persisted in Postgres with pgvector.
 
 ## Architecture
 
