@@ -24,7 +24,8 @@
     "format:check": "prettier --check .",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "db:backfill-vectors": "tsx scripts/backfill-pgvector.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.124.0",

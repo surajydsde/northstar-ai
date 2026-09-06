@@ -23,8 +23,8 @@ is an environment change, not a code change — see
 [docs/ai-providers.md](./docs/ai-providers.md).
 
 Inference is served by an external provider API; there is no local model
-runtime. Vector search runs against Postgres — there is no separate vector
-database.
+runtime. Vector search runs against Postgres via pgvector HNSW indexes — there is no
+separate vector database.
 
 ## Prerequisites
 
@@ -63,6 +63,7 @@ Open http://localhost:3000.
 | `npm run db` | Start PostgreSQL via Docker |
 | `npm run db:migrate` | Apply `src/db/migrations/*.sql` |
 | `npm run db:generate` | Generate a Drizzle migration from the schema |
+| `npm run db:backfill-vectors` | Backfill `embedding_vec` columns from existing json embeddings |
 | `npm run ai:verify` | Live check of chat, streaming and embeddings |
 | `npm run ai:reembed` | Rewrite stored vectors under the current model |
 | `npm run smoke:rag` | End-to-end RAG + memory + persistence test |
@@ -79,11 +80,9 @@ Every variable is documented in
 Two things are worth reading before changing them:
 
 **Changing the embedding model invalidates every stored vector.** Vectors from
-different models are not comparable even at the same dimensionality, and the
-failure is silent — retrieval returns plausible-looking but meaningless scores.
-The app tags each vector with its model and skips non-matching ones, so stale
-data becomes a visible gap rather than wrong answers. Run `npm run ai:reembed`
-after any embedding-model change.
+different models are not comparable even at the same dimensionality. Run
+`npm run ai:reembed` after any embedding-model change to repopulate the
+`embedding_vec` columns.
 
 **Relevance thresholds are model-specific.** `RAG_MIN_SCORE` defaults to `0.62`,
 calibrated for `gemini-embedding-001`. A different embedding model needs a
@@ -101,17 +100,9 @@ different value; `npm run ai:verify` reports the numbers to calibrate against.
 
 ## Known limitations
 
-- **Retrieval scans in Node.** Embeddings live in `json` columns that no index
-  can serve, so queries are bounded by `RAG_MAX_DOCUMENTS` (25) and
-  `MEMORY_MAX_SCANNED` (1000). Content beyond those bounds is not searchable.
-  Moving vectors to `pgvector` removes the need for the caps, but your
-  PostgreSQL install does not provide the extension — see
-  [docs/pgvector-migration.md](./docs/pgvector-migration.md).
-- **No end-to-end browser tests.** 147 unit tests cover the AI layer and
-  embedding logic (94% statements, 89% branches). Route handlers and React
-  components are not yet covered; Playwright is not set up.
-- **No git remote configured**, so CI has not run yet. The workflow in
-  `.github/workflows/ci.yml` is written but unexercised.
+- **No end-to-end browser tests.** 154 unit tests cover the AI layer and
+  embedding logic. Route handlers and React components are not yet covered;
+  Playwright is not set up.
 - `src/tools/`, `src/features/chat/mock-data.ts` and
   `src/components/chat-shell.tsx` are unreferenced legacy files.
 
